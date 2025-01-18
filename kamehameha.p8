@@ -3,32 +3,91 @@ version 42
 __lua__
 
 
-x=24 y=24 -- position (in tiles)
-dx=0 dy=0 -- velocity
+x=24 y=24
+dx=0 dy=0
+kamehameha = false
+kamehameha_frame = 0
+kamehameha_x = 0
+kamehameha_y = 0
 
 function draw_player()
-    spr(1, x, y, 2, 2)
+    if 1 < kamehameha_frame and kamehameha_frame <= 4 then
+        spr(3, x, y, 2, 2)
+    elseif 4 < kamehameha_frame and kamehameha_frame <= 8 then
+        spr(5, x, y, 2, 2)
+    elseif 8 < kamehameha_frame and kamehameha_frame <= 50 then
+        spr(7, x, y, 2, 2)
+    else
+        spr(1, x, y, 2, 2)
+    end
+end
+
+function draw_kamehameha(start_x, start_y)
+    laser_gap = 8
+    frame_gap = 7
+    if (kamehameha_frame > frame_gap) then
+        spr(9, start_x + 10, start_y - 6, 2, 2)
+    end
+
+    if (kamehameha_frame > 2 * frame_gap) then
+        spr(11, start_x + 10 + 1 * laser_gap, start_y - 6, 1, 2)
+    end
+    if (kamehameha_frame > 3 * frame_gap) then
+        spr(11, start_x + 10 + 2 * laser_gap, start_y - 6, 1, 2)
+    end
+    if (kamehameha_frame > 4 * frame_gap) then
+        spr(11, start_x + 10 + 3 * laser_gap, start_y - 6, 1, 2)
+    end
+    if (kamehameha_frame > 5 * frame_gap) then
+        spr(11, start_x + 10 + 4 * laser_gap, start_y - 6, 1, 2)
+    end
+
+    if (kamehameha_frame > 6 * frame_gap) then
+        spr(12, start_x + 10 + 5 * laser_gap, start_y - 6, 1, 2)
+    end
 end
 
 function _draw()
     map() 
-
     draw_player(x, y)
+    print("press 🅾️ to KAMEHAMEHAAAAAAAAAAA")
+
+    -- draw kamehameha
+    if (kamehameha) then
+        draw_kamehameha(kamehameha_x, kamehameha_y)
+    end
+    
 end
 
-function _update()
-	
-	if (btn(⬅️)) dx-= 1
-	if (btn(➡️)) dx+= 1
-	if (btn(⬆️)) dy-= 1
-	if (btn(⬇️)) dy+= 1
-	
+
+function move()
+    if (btn(⬅️)) dx-= 1
+    if (btn(➡️)) dx+= 1
+    if (btn(⬆️)) dy-= 1
+    if (btn(⬇️)) dy+= 1
+
     -- move
 	x+=dx y+=dy
 
     -- friction
     dx *=.7
 	dy *=.7
+end
+
+function _update()
+    move()
+    if (btnp(4)) then
+        kamehameha_x = x
+        kamehameha_y = y
+		kamehameha = true
+	end
+    if kamehameha then
+        kamehameha_frame += 1
+        if kamehameha_frame > 60 then
+            kamehameha = false
+            kamehameha_frame = 0
+        end
+    end
 end
 
 __gfx__
