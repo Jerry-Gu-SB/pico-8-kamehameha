@@ -3,92 +3,119 @@ version 42
 __lua__
 
 
-x=24 y=24
-dx=0 dy=0
-kamehameha = false
+x = 24
+y = 24
+dx = 0
+dy = 0
+
 kamehameha_frame = 0
-kamehameha_x = 0
-kamehameha_y = 0
+objects = {}
 
 function draw_player()
     if 1 < kamehameha_frame and kamehameha_frame <= 4 then
         spr(3, x, y, 2, 2)
     elseif 4 < kamehameha_frame and kamehameha_frame <= 8 then
         spr(5, x, y, 2, 2)
-    elseif 8 < kamehameha_frame and kamehameha_frame <= 50 then
+    elseif 8 < kamehameha_frame and kamehameha_frame <= 20 then
         spr(7, x, y, 2, 2)
     else
         spr(1, x, y, 2, 2)
     end
 end
 
-function draw_kamehameha(start_x, start_y)
+function draw_kamehameha(k)
     laser_gap = 8
     frame_gap = 7
-    if (kamehameha_frame > frame_gap) then
-        spr(9, start_x + 10, start_y - 6, 2, 2)
+    if k.frame > frame_gap then
+        spr(9, k.x, k.y, 2, 2)
     end
 
-    if (kamehameha_frame > 2 * frame_gap) then
-        spr(11, start_x + 10 + 1 * laser_gap, start_y - 6, 1, 2)
-    end
-    if (kamehameha_frame > 3 * frame_gap) then
-        spr(11, start_x + 10 + 2 * laser_gap, start_y - 6, 1, 2)
-    end
-    if (kamehameha_frame > 4 * frame_gap) then
-        spr(11, start_x + 10 + 3 * laser_gap, start_y - 6, 1, 2)
-    end
-    if (kamehameha_frame > 5 * frame_gap) then
-        spr(11, start_x + 10 + 4 * laser_gap, start_y - 6, 1, 2)
+    for i = 1, 5 do
+        if k.frame > (i + 1) * frame_gap then
+            spr(11, k.x + i * laser_gap, k.y, 1, 2)
+        end
     end
 
-    if (kamehameha_frame > 6 * frame_gap) then
-        spr(12, start_x + 10 + 5 * laser_gap, start_y - 6, 1, 2)
+    if k.frame > 6 * frame_gap then
+        spr(12, k.x + 5 * laser_gap, k.y, 1, 2)
     end
+end
+
+function update_kamehameha(k)
+    k.frame += 1
+    k.x += k.dx
+    k.y += k.dy
+    return k.frame < 50 -- Remove the Kamehameha after 50 frames
+end
+
+function new_kamehameha(start_x, start_y, dx, dy)
+    local k = {
+        x = start_x + 10, -- Offset to appear in front of the player
+        y = start_y, -- Slight vertical offset
+        dx = 0,
+        dy = 0,
+        frame = 0,
+        update = update_kamehameha,
+        draw = draw_kamehameha,
+    }
+    add(objects, k)
 end
 
 function _draw()
-    map() 
-    draw_player(x, y)
-    print("press 🅾️ to KAMEHAMEHAAAAAAAAAAA")
+    cls() -- Clear the screen
+    map()
+    draw_player()
 
-    -- draw kamehameha
-    if (kamehameha) then
-        draw_kamehameha(kamehameha_x, kamehameha_y)
+    print("Press 🅾️ to KAMEHAMEHAAAAAAAAAAA", 2, 2, 7)
+    for obj in all(objects) do
+        obj:draw()
     end
-    
 end
 
-
 function move()
-    if (btn(⬅️)) dx-= 1
-    if (btn(➡️)) dx+= 1
-    if (btn(⬆️)) dy-= 1
-    if (btn(⬇️)) dy+= 1
+    if btn(⬅️) then dx -= 1 end
+    if btn(➡️) then dx += 1 end
+    if btn(⬆️) then dy -= 1 end
+    if btn(⬇️) then dy += 1 end
 
-    -- move
-	x+=dx y+=dy
+    x += dx
+    y += dy
 
-    -- friction
-    dx *=.7
-	dy *=.7
+    dx *= 0.7
+    dy *= 0.7
 end
 
 function _update()
     move()
-    if (btnp(4)) then
-        kamehameha_x = x
-        kamehameha_y = y
-		kamehameha = true
-	end
-    if kamehameha then
+
+    -- Trigger Kamehameha animation and laser
+    if btnp(4) and kamehameha_frame == 0 then
+        kamehameha_frame = 1
+    end
+
+    -- Handle Kamehameha animation
+    if kamehameha_frame > 0 then
         kamehameha_frame += 1
-        if kamehameha_frame > 60 then
-            kamehameha = false
+
+        -- Launch a laser at frame 8
+        if kamehameha_frame == 8 then
+            new_kamehameha(x, y, 2, 0)
+        end
+
+        if kamehameha_frame > 50 then
             kamehameha_frame = 0
         end
     end
+
+    -- Update objects and clean up expired ones
+    for i = #objects, 1, -1 do
+        if not objects[i]:update() then
+            del(objects, objects[i])
+        end
+    end
 end
+   
+
 
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000077777777000000000000
