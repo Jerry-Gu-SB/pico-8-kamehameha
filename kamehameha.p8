@@ -90,12 +90,16 @@ end
 
 function update_kamehameha(k)
     k.frame += 1
+    if k.frame == 9 then
+        k.x = player.x + 10
+        k.y = player.y
+    end
     return k.frame < 50
 end
 
 function new_kamehameha(start_x, start_y, dx, dy)
     local k = {
-        x = start_x + 10,
+        x = start_x,
         y = start_y,
         dx = 0,
         dy = 0,
