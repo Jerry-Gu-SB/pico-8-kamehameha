@@ -2,30 +2,77 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 
+function _init()
+    objects = {}
 
-x = 24
-y = 24
-dx = 0
-dy = 0
+    player = {
+        x = 24,
+        y = 24,
+        dx = 0,
+        dy = 0,
+        frame = 0,
+        update = update_player,
+        draw = draw_player,
+    }
+end
 
-kamehameha_frame = 0
-objects = {}
+function _update()
+    update_player()
+
+    if btnp(4) then
+        new_kamehameha(player.x, player.y, 0, 0)
+        player.frame = 1
+    end
+
+    for i = #objects, 1, -1 do
+        if not objects[i]:update() then
+            del(objects, objects[i])
+        end
+    end
+end
+
+function _draw()
+    cls()
+    map()
+    draw_player()
+
+    print("Press 🅾️ to KAMEHAMEHAAAAAAAAAAA", 2, 2, 7)
+    for obj in all(objects) do
+        obj:draw()
+    end
+end
 
 function draw_player()
-    if 1 < kamehameha_frame and kamehameha_frame <= 4 then
-        spr(3, x, y, 2, 2)
-    elseif 4 < kamehameha_frame and kamehameha_frame <= 8 then
-        spr(5, x, y, 2, 2)
-    elseif 8 < kamehameha_frame and kamehameha_frame <= 20 then
-        spr(7, x, y, 2, 2)
+    if 1 < player.frame and player.frame <= 4 then
+        spr(3, player.x, player.y, 2, 2)
+    elseif 4 < player.frame and player.frame <= 8 then
+        spr(5, player.x, player.y, 2, 2)
+    elseif 8 < player.frame and player.frame <= 20 then
+        spr(7, player.x, player.y, 2, 2)
     else
-        spr(1, x, y, 2, 2)
+        spr(1, player.x, player.y, 2, 2)
     end
+end
+
+function update_player()
+    if player.frame > 0 then player.frame += 1 end
+    if player.frame > 20 then player.frame = 0 end
+    
+    if btn(⬅️) then player.dx -= 1 end
+    if btn(➡️) then player.dx += 1 end
+    if btn(⬆️) then player.dy -= 1 end
+    if btn(⬇️) then player.dy += 1 end
+
+    player.x += player.dx
+    player.y += player.dy
+
+    player.dx *= 0.7
+    player.dy *= 0.7
 end
 
 function draw_kamehameha(k)
     laser_gap = 8
-    frame_gap = 7
+    frame_gap = 8
     if k.frame > frame_gap then
         spr(9, k.x, k.y, 2, 2)
     end
@@ -43,15 +90,13 @@ end
 
 function update_kamehameha(k)
     k.frame += 1
-    k.x += k.dx
-    k.y += k.dy
-    return k.frame < 50 -- Remove the Kamehameha after 50 frames
+    return k.frame < 50
 end
 
 function new_kamehameha(start_x, start_y, dx, dy)
     local k = {
-        x = start_x + 10, -- Offset to appear in front of the player
-        y = start_y, -- Slight vertical offset
+        x = start_x + 10,
+        y = start_y,
         dx = 0,
         dy = 0,
         frame = 0,
@@ -59,62 +104,7 @@ function new_kamehameha(start_x, start_y, dx, dy)
         draw = draw_kamehameha,
     }
     add(objects, k)
-end
-
-function _draw()
-    cls() -- Clear the screen
-    map()
-    draw_player()
-
-    print("Press 🅾️ to KAMEHAMEHAAAAAAAAAAA", 2, 2, 7)
-    for obj in all(objects) do
-        obj:draw()
-    end
-end
-
-function move()
-    if btn(⬅️) then dx -= 1 end
-    if btn(➡️) then dx += 1 end
-    if btn(⬆️) then dy -= 1 end
-    if btn(⬇️) then dy += 1 end
-
-    x += dx
-    y += dy
-
-    dx *= 0.7
-    dy *= 0.7
-end
-
-function _update()
-    move()
-
-    -- Trigger Kamehameha animation and laser
-    if btnp(4) and kamehameha_frame == 0 then
-        kamehameha_frame = 1
-    end
-
-    -- Handle Kamehameha animation
-    if kamehameha_frame > 0 then
-        kamehameha_frame += 1
-
-        -- Launch a laser at frame 8
-        if kamehameha_frame == 8 then
-            new_kamehameha(x, y, 2, 0)
-        end
-
-        if kamehameha_frame > 50 then
-            kamehameha_frame = 0
-        end
-    end
-
-    -- Update objects and clean up expired ones
-    for i = #objects, 1, -1 do
-        if not objects[i]:update() then
-            del(objects, objects[i])
-        end
-    end
-end
-   
+end  
 
 
 __gfx__
