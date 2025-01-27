@@ -36,7 +36,7 @@ function _draw()
     map()
     draw_player()
 
-    print("Press 🅾️ to KAMEHAMEHAAAAAAAAAAA", 2, 2, 7)
+    print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
     for obj in all(objects) do
         obj:draw()
     end
