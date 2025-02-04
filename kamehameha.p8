@@ -6,6 +6,8 @@ __lua__
 -- Notes taken from the MIDI transcription by Deadbeet
 -- https://onlinesequencer.net/1993848
 KAMEHAMEHA_STARTUP_FRAMES = 10
+LASER_PUSHBACK = 15
+
 function _init()
     objects = {}
     player = {
@@ -66,8 +68,6 @@ function update_player()
 
     player.dx *= 0.7
     player.dy *= 0.7
-
-    
 end
 
 function update_kamehameha(k)
@@ -75,7 +75,8 @@ function update_kamehameha(k)
     if k.frame == KAMEHAMEHA_STARTUP_FRAMES then
         k.x = player.x + 10
         k.y = player.y
-        player.dx -= 6
+
+        player.dx -= LASER_PUSHBACK
     end
     return k.frame < 50
 end
@@ -107,16 +108,15 @@ end
 function draw_kamehameha(k)
     laser_gap = 7
     frame_gap = 3
+
     if k.frame > KAMEHAMEHA_STARTUP_FRAMES then
         spr(9, k.x, k.y, 2, 2)
     end
-
     for i = 1, 4 do
         if k.frame > (i + 1) * frame_gap + KAMEHAMEHA_STARTUP_FRAMES then
             spr(11, k.x + i * laser_gap, k.y, 1, 2)
         end
     end
-
     if k.frame > 5 * frame_gap  + KAMEHAMEHA_STARTUP_FRAMES then
         spr(12, k.x + 5 * laser_gap, k.y, 1, 2)
     end
@@ -134,7 +134,6 @@ function new_kamehameha(start_x, start_y, dx, dy)
     }
     add(objects, k)
 end  
-
 
 __gfx__
 00000000000000000000000000000000000000000a000000000000000a0a0000000000000a000000000aaaa0000aaa0a0000000a000077777777000000000000
