@@ -51,6 +51,11 @@ function update_player()
     if player.frame > 0 then player.frame += 1 end
     if player.frame > 20 then player.frame = 0 end
 
+    if player.x < 0 then player.x = 0 end
+    if player.x > 115 then player.x = 115 end
+    if player.y < 0 then player.y = 0 end
+    if player.y > 108 then player.y = 108 end
+
     if btn(⬅️) then player.dx -= 1 end
     if btn(➡️) then player.dx += 1 end
     if btn(⬆️) then player.dy -= 1 end
@@ -61,6 +66,8 @@ function update_player()
 
     player.dx *= 0.7
     player.dy *= 0.7
+
+    
 end
 
 function update_kamehameha(k)
