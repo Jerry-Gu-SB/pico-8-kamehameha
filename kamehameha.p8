@@ -133,8 +133,8 @@ function draw_player()
 end
 
 function draw_kamehameha(k)
-    laser_gap = 7
-    frame_gap = 3
+    laser_gap = 8 -- can be a max of 8
+    frame_gap = 1
 
     if k.frame > KAMEHAMEHA_STARTUP_FRAMES then
         spr(9, k.x, k.y, 2, 2)
