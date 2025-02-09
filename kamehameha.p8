@@ -102,8 +102,8 @@ end
 function _draw()
     cls()
     draw_map()
-    draw_fire()
     draw_player()
+    draw_fire()
     
 
     print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
