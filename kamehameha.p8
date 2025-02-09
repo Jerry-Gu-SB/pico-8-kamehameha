@@ -105,7 +105,6 @@ function _draw()
     draw_player()
     draw_fire()
     
-
     print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
     
     for obj in all(objects) do
