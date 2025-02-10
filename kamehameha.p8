@@ -77,6 +77,8 @@ function update_objects()
         if not objects[i]:update() then
             del(objects, objects[i])
         end
+        objects[i].x += objects[i].dx
+        objects[i].y += objects[i].dy
     end
 end
 
@@ -91,9 +93,15 @@ function update_kamehameha(k)
     return k.frame < 50
 end
 
+function update_meteor(m)
+    m.frame += 1
+    return m.frame < 80
+end
+
 function update_button_4()
     if btnp(4) then
         new_kamehameha(player.x, player.y, 0, 0)
+        new_meteor(player.x + 10, player.y + 10, -10, 0)
         sfx(4)
         player.frame = 1
     end
@@ -169,6 +177,25 @@ function draw_kamehameha(k)
     if k.frame > 5 * frame_gap  + KAMEHAMEHA_STARTUP_FRAMES then
         spr(12, k.x + 5 * laser_gap, k.y, 1, 2)
     end
+end
+
+function draw_meteor(m)
+    if m.frame > 0 then
+        spr(35, m.x, m.y, 2, 1)
+    end
+end
+
+function new_meteor(start_x, start_y, dx, dy)
+    local m = {
+        x = start_x,
+        y = start_y,
+        dx = -10,
+        dy = 0,
+        frame = 0,
+        update = update_meteor,
+        draw = draw_meteor,
+    }
+    add(objects, m)
 end
 
 function new_kamehameha(start_x, start_y, dx, dy)
