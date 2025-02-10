@@ -76,9 +76,10 @@ function update_objects()
     for i = #objects, 1, -1 do
         if not objects[i]:update() then
             del(objects, objects[i])
+        else
+            objects[i].x += objects[i].dx
+            objects[i].y += objects[i].dy
         end
-        objects[i].x += objects[i].dx
-        objects[i].y += objects[i].dy
     end
 end
 
@@ -189,7 +190,7 @@ function new_meteor(start_x, start_y, dx, dy)
     local m = {
         x = start_x,
         y = start_y,
-        dx = -10,
+        dx = -2,
         dy = 0,
         frame = 0,
         update = update_meteor,
