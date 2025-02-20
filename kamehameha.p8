@@ -18,6 +18,8 @@ FIRE_INTERVAL = 1
 FIRE_SPRITE_INDICES = {15,31,47,63}
 FIRE_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
+METEOR_INTERVAL = 30
+
 function _init()
     objects = {}
     player = {
@@ -37,6 +39,7 @@ function _update()
     update_player()
     update_objects()
     update_button_4()
+    spawn_meteor()
 end
 
 function update_map()
@@ -88,21 +91,27 @@ function update_kamehameha(k)
     if k.frame == KAMEHAMEHA_STARTUP_FRAMES then
         k.x = player.x + 10
         k.y = player.y
-
         player.dx -= LASER_PUSHBACK
     end
     return k.frame < 50
 end
 
+function spawn_meteor()
+    if METEOR_INTERVAL <= 1 then
+        initialize_meteor_interval()
+        new_meteor(128, flr(rnd(120)), -5, 0)
+    end
+    METEOR_INTERVAL -= 1
+end
+
 function update_meteor(m)
     m.frame += 1
-    return m.frame < 80
+    return m.frame < 150
 end
 
 function update_button_4()
     if btnp(4) then
         new_kamehameha(player.x, player.y, 0, 0)
-        new_meteor(player.x + 10, player.y + 10, -10, 0)
         sfx(4)
         player.frame = 1
     end
@@ -190,7 +199,7 @@ function new_meteor(start_x, start_y, dx, dy)
     local m = {
         x = start_x,
         y = start_y,
-        dx = -2,
+        dx = -1,
         dy = 0,
         frame = 0,
         update = update_meteor,
@@ -220,6 +229,11 @@ end
 function initialize_fire_interval()
     FIRE_INTERVAL = flr(rnd(21)) + 10
 end
+
+function initialize_meteor_interval()
+    METEOR_INTERVAL = flr(rnd(30)) + 15
+end
+
 
 __gfx__
 8000000800000000000000000a0acaaaa00000000a0000000000000000000000c00a0a000a000000000aaaa0000aaa0a0000000a0000777777770000c7771100
