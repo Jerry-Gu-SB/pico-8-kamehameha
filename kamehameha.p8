@@ -6,9 +6,10 @@ __lua__
 -- Notes taken from the MIDI transcription by Deadbeet
 -- onlinesequencer.net/1993848
 
--- meteor flag: 1000 0000
--- kamehameha flag: 0100 0000
--- shield flag: 0010 0000
+-- meteor flag: 1
+-- kamehameha flag: 2
+-- shield flag: 3
+-- player flag: 4
 
 KAMEHAMEHA_STARTUP_FRAMES = 10
 LASER_PUSHBACK = 15
@@ -23,6 +24,8 @@ SHIELD_SPRITE_INDICES = {15,31,47,63}
 SHIELD_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
 METEOR_INTERVAL = 30
+
+GAME_OVER = false
 
 function _init()
     objects = {}
@@ -44,6 +47,17 @@ function _update()
     update_objects()
     update_button_4()
     spawn_meteor()
+
+    if is_object_colliding_with_shield(player, 16, 16) then
+        GAME_OVER = true
+    end
+
+    if GAME_OVER then
+        if btnp(5) then
+            GAME_OVER = false
+            _init()
+        end
+    end
 end
 
 function spawn_meteor()
@@ -122,6 +136,21 @@ function update_button_4()
     end
 end
 
+-- adapted from: https://www.lexaloffle.com/bbs/?tid=3116
+function is_object_colliding_with_shield(object, width, height)
+    collide = false
+    local x1 = object.x/8
+    local y1 = object.y/8
+    local x2 = (object.x + width)/8
+    local y2 = (object.y + height)/8
+    local a = fget(mget(x1, y1), 3)
+    local b = fget(mget(x2, y1), 3)
+    local c = fget(mget(x1, y2), 3)
+    local d = fget(mget(x2, y2), 3)
+    if a or b or c or d then collide = true end
+    return collide
+end
+
 function _draw()
     cls()
     draw_map()
@@ -130,6 +159,11 @@ function _draw()
     
     print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
     
+    if GAME_OVER then
+        print("game over", 40, 64, 7)
+        print("press 🅾️ to try again", 32, 72, 7)
+    end
+
     for obj in all(objects) do
         obj:draw()
     end
@@ -137,7 +171,7 @@ end
 
 function draw_fire()
     if SHIELD_INTERVAL <= 1 then
-        initialize_SHIELD_INTERVAL()
+        initialize_shield_interval()
         for i = 0, 15 do
             fire_sprite = flr(rnd(4)) + 1
             SHIELD_SPRITE_ARRAY[i] = SHIELD_SPRITE_INDICES[fire_sprite]
@@ -231,7 +265,7 @@ function initialize_star_interval()
     STAR_INTERVAL = flr(rnd(21)) + 10
 end
 
-function initialize_SHIELD_INTERVAL()
+function initialize_shield_interval()
     SHIELD_INTERVAL = flr(rnd(21)) + 10
 end
 
