@@ -155,6 +155,7 @@ function _draw()
     cls()
     draw_map()
     draw_player()
+    draw_objects()
     draw_fire()
     
     print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
@@ -163,7 +164,9 @@ function _draw()
         print("game over", 40, 64, 7)
         print("press 🅾️ to try again", 32, 72, 7)
     end
+end
 
+function draw_objects()
     for obj in all(objects) do
         obj:draw()
     end
