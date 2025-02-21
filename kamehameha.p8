@@ -105,6 +105,7 @@ function update_player()
     end
 end
 
+--- Object management system from: https://www.lexaloffle.com/bbs/?tid=44686
 function update_objects()
     for i = #objects, 1, -1 do
         if not objects[i]:update() then
@@ -133,7 +134,7 @@ function update_meteor(m)
     if m.x == 0 and not SHIELD_HIT then
         new_game_end_explosion(m.x, m.y, 0, 0)
 
-        --- make meteor disappear after explosion
+        --- make meteor "disappear" after explosion
         m.x = 1000
         m.y = 1000
 
@@ -226,9 +227,11 @@ function draw_shield()
             SHIELD_SPRITE_ARRAY[i] = SHIELD_SPRITE_INDICES[fire_sprite]
         end
     end
+
     for i = 0, 15 do
         spr(SHIELD_SPRITE_ARRAY[i], 0, i * 8, 1, 1)
     end
+
     SHIELD_INTERVAL -= 1
 end
 
