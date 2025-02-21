@@ -11,6 +11,17 @@ __lua__
 -- shield flag: 3
 -- player flag: 4
 
+--to do: 
+    -- laser logic
+    -- shield hit sfx
+    -- player hit sfx
+    -- meteor getting lasered sfx
+    -- game over sfx
+
+    -- game start screen?
+    -- extra animations for meteors flying by
+    -- maybe redo stars to be less bright
+
 function _init()
     KAMEHAMEHA_STARTUP_FRAMES = 10
     LASER_PUSHBACK = 15
