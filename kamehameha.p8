@@ -50,12 +50,15 @@ function _init()
 end
 
 function _update()
+    check_game_state()
     update_map()
     update_player()
     update_objects()
     update_button_4()
     spawn_meteor()
+end
 
+function check_game_state()
     if SHIELD_HIT or PLAYER_HIT then
         if btnp(5) then
             SHIELD_HIT = false
@@ -63,14 +66,6 @@ function _update()
             _init()
         end
     end
-end
-
-function spawn_meteor()
-    if METEOR_INTERVAL <= 1 then
-        initialize_meteor_interval()
-        new_meteor(128, flr(rnd(120)), -5, 0)
-    end
-    METEOR_INTERVAL -= 1
 end
 
 function update_map()
@@ -157,6 +152,13 @@ function update_button_4()
     end
 end
 
+function spawn_meteor()
+    if METEOR_INTERVAL <= 1 then
+        initialize_meteor_interval()
+        new_meteor(128, flr(rnd(120)), -5, 0)
+    end
+    METEOR_INTERVAL -= 1
+end
 
 function _draw()
     cls()
@@ -164,53 +166,7 @@ function _draw()
     draw_player()
     draw_objects()
     draw_shield()
-    
-    print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
-
-    if SHIELD_HIT or PLAYER_HIT then
-        print("game over", 40, 64, 7)
-        print("press 🅾️ to try again", 32, 72, 7)
-    end
-end
-
-
-
-function draw_objects()
-    for obj in all(objects) do
-        obj:draw()
-    end
-end
-
-function draw_explosion(e)
-    if PLAYER_HIT then
-        if 1 < e.frame and e.frame <= 5 then
-            spr(65, e.x, e.y, 2, 2)
-        elseif 5 < e.frame and e.frame <= 10 then
-            spr(67, e.x, e.y, 2, 2)
-        elseif 10 < e.frame and e.frame <= 15 then
-            spr(69, e.x, e.y, 2, 2)
-        elseif 15 < e.frame and e.frame <= 20 then
-            spr(73, e.x, e.y, 2, 2)
-        elseif 20 < e.frame and e.frame <= 25 then            
-            spr(75, e.x, e.y, 2, 2)
-        elseif 25 < e.frame and e.frame <= 30 then
-            spr(77, e.x, e.y, 2, 2)
-        end
-    end
-end
-
-function draw_shield()
-    if SHIELD_INTERVAL <= 1 then
-        initialize_shield_interval()
-        for i = 0, 15 do
-            fire_sprite = flr(rnd(4)) + 1
-            SHIELD_SPRITE_ARRAY[i] = SHIELD_SPRITE_INDICES[fire_sprite]
-        end
-    end
-    for i = 0, 15 do
-        spr(SHIELD_SPRITE_ARRAY[i], 0, i * 8, 1, 1)
-    end
-    SHIELD_INTERVAL -= 1
+    draw_ui()
 end
 
 function draw_map()
@@ -241,6 +197,36 @@ function draw_player()
     end
 end
 
+function draw_objects()
+    for obj in all(objects) do
+        obj:draw()
+    end
+end
+
+function draw_shield()
+    if SHIELD_INTERVAL <= 1 then
+        initialize_shield_interval()
+        for i = 0, 15 do
+            fire_sprite = flr(rnd(4)) + 1
+            SHIELD_SPRITE_ARRAY[i] = SHIELD_SPRITE_INDICES[fire_sprite]
+        end
+    end
+    for i = 0, 15 do
+        spr(SHIELD_SPRITE_ARRAY[i], 0, i * 8, 1, 1)
+    end
+    SHIELD_INTERVAL -= 1
+end
+
+function draw_ui()
+    print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
+
+    if SHIELD_HIT or PLAYER_HIT then
+        print("game over", 40, 64, 7)
+        print("press 🅾️ to try again", 32, 72, 7)
+    end
+end
+
+--- OBJECTS
 function draw_kamehameha(k)
     laser_gap = 8 -- can be a max of 8
     frame_gap = 1
@@ -266,6 +252,25 @@ function draw_meteor(m)
     end
 end
 
+function draw_explosion(e)
+    if PLAYER_HIT then
+        if 1 < e.frame and e.frame <= 5 then
+            spr(65, e.x, e.y, 2, 2)
+        elseif 5 < e.frame and e.frame <= 10 then
+            spr(67, e.x, e.y, 2, 2)
+        elseif 10 < e.frame and e.frame <= 15 then
+            spr(69, e.x, e.y, 2, 2)
+        elseif 15 < e.frame and e.frame <= 20 then
+            spr(73, e.x, e.y, 2, 2)
+        elseif 20 < e.frame and e.frame <= 25 then            
+            spr(75, e.x, e.y, 2, 2)
+        elseif 25 < e.frame and e.frame <= 30 then
+            spr(77, e.x, e.y, 2, 2)
+        end
+    end
+end
+
+--- OBJECT INSTANTIATION
 function new_meteor(start_x, start_y, dx, dy)
     local m = {
         x = start_x,
@@ -305,6 +310,7 @@ function new_explosion(start_x, start_y, dx, dy)
     add(objects, e)
 end
 
+--- RANDOM NUMBER GENERATION
 function initialize_star_interval()
     -- from: pico-8.fandom.com/wiki/Rnd
     STAR_INTERVAL = flr(rnd(21)) + 10
