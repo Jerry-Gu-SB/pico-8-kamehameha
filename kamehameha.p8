@@ -97,6 +97,12 @@ function update_player()
 
     player.dx *= 0.7
     player.dy *= 0.7
+
+    --- Prevents player from moving after death
+    if PLAYER_HIT then
+        player.x = 1000
+        player.y = 1000
+    end
 end
 
 function update_objects()
@@ -124,13 +130,18 @@ end
 function update_meteor(m)
     m.frame += 1
 
-    if m.x == 0 then
-        GAME_OVER = true
+    if m.x == 0 and not SHIELD_HIT then
+        new_game_end_explosion(m.x, m.y, 0, 0)
+        
+        --- make meteor disappear after explosion
+        m.x = 1000
+        m.y = 1000
+
         SHIELD_HIT = true
     end
 
     if (player.x + 3 <= m.x) and (m.x <= player.x + 13) and (player.y <= m.y) and (m.y <= player.y + 11) then
-        new_explosion(player.x, player.y, 0, 0)
+        new_game_end_explosion(player.x, player.y, 0, 0)
         PLAYER_HIT = true
     end
 
@@ -182,16 +193,18 @@ function draw_map()
 end
 
 function draw_player()
-    if not PLAYER_HIT then
-        if 1 < player.frame and player.frame <= 4 then
-            spr(3, player.x, player.y, 2, 2)
-        elseif 4 < player.frame and player.frame <= 8 then
-            spr(5, player.x, player.y, 2, 2)
-        elseif 8 < player.frame and player.frame <= 20 then
-            spr(7, player.x, player.y, 2, 2)
-        else
-            spr(1, player.x, player.y, 2, 2)
-        end
+    if PLAYER_HIT then
+        return
+    end
+    
+    if 1 < player.frame and player.frame <= 4 then
+        spr(3, player.x, player.y, 2, 2)
+    elseif 4 < player.frame and player.frame <= 8 then
+        spr(5, player.x, player.y, 2, 2)
+    elseif 8 < player.frame and player.frame <= 20 then
+        spr(7, player.x, player.y, 2, 2)
+    else
+        spr(1, player.x, player.y, 2, 2)
     end
 end
 
@@ -202,6 +215,10 @@ function draw_objects()
 end
 
 function draw_shield()
+    if SHIELD_HIT then
+        return
+    end
+
     if SHIELD_INTERVAL <= 1 then
         initialize_shield_interval()
         for i = 0, 15 do
@@ -250,21 +267,19 @@ function draw_meteor(m)
     end
 end
 
-function draw_explosion(e)
-    if PLAYER_HIT then
-        if 1 < e.frame and e.frame <= 5 then
-            spr(65, e.x, e.y, 2, 2)
-        elseif 5 < e.frame and e.frame <= 10 then
-            spr(67, e.x, e.y, 2, 2)
-        elseif 10 < e.frame and e.frame <= 15 then
-            spr(69, e.x, e.y, 2, 2)
-        elseif 15 < e.frame and e.frame <= 20 then
-            spr(73, e.x, e.y, 2, 2)
-        elseif 20 < e.frame and e.frame <= 25 then            
-            spr(75, e.x, e.y, 2, 2)
-        elseif 25 < e.frame and e.frame <= 30 then
-            spr(77, e.x, e.y, 2, 2)
-        end
+function draw_game_end_explosion(e)
+    if 1 < e.frame and e.frame <= 5 then
+        spr(65, e.x, e.y, 2, 2)
+    elseif 5 < e.frame and e.frame <= 10 then
+        spr(67, e.x, e.y, 2, 2)
+    elseif 10 < e.frame and e.frame <= 15 then
+        spr(69, e.x, e.y, 2, 2)
+    elseif 15 < e.frame and e.frame <= 20 then
+        spr(73, e.x, e.y, 2, 2)
+    elseif 20 < e.frame and e.frame <= 25 then            
+        spr(75, e.x, e.y, 2, 2)
+    elseif 25 < e.frame and e.frame <= 30 then
+        spr(77, e.x, e.y, 2, 2)
     end
 end
 
@@ -295,7 +310,7 @@ function new_kamehameha(start_x, start_y, dx, dy)
     add(objects, k)
 end  
 
-function new_explosion(start_x, start_y, dx, dy)
+function new_game_end_explosion(start_x, start_y, dx, dy)
     local e = {
         x = start_x,
         y = start_y,
@@ -303,7 +318,7 @@ function new_explosion(start_x, start_y, dx, dy)
         dy = dy,
         frame = 0,
         update = update_explosion,
-        draw = draw_explosion,
+        draw = draw_game_end_explosion,
     }
     add(objects, e)
 end
