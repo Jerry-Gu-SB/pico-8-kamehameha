@@ -30,6 +30,11 @@ function _init()
 
     SHIELD_HIT = false
     PLAYER_HIT = false
+
+    EXPLOSION_X = 0
+    EXPLOSION_Y = 0
+    EXPLOSION_FRAME = 0
+
     objects = {}
     player = {
         x = 24,
@@ -39,6 +44,7 @@ function _init()
         frame = 0,
         update = update_player,
         draw = draw_player,
+        health = 1,
     }
     music(0)
 end
@@ -131,10 +137,16 @@ function update_meteor(m)
     end
 
     if (player.x + 3 <= m.x) and (m.x <= player.x + 13) and (player.y <= m.y) and (m.y <= player.y + 11) then
+        new_explosion(player.x, player.y, 0, 0)
         PLAYER_HIT = true
     end
 
     return m.frame < 150
+end
+
+function update_explosion(e)
+    e.frame += 1
+    return e.frame < 35
 end
 
 function update_button_4()
@@ -161,9 +173,29 @@ function _draw()
     end
 end
 
+
+
 function draw_objects()
     for obj in all(objects) do
         obj:draw()
+    end
+end
+
+function draw_explosion(e)
+    if PLAYER_HIT then
+        if 1 < e.frame and e.frame <= 5 then
+            spr(65, e.x, e.y, 2, 2)
+        elseif 5 < e.frame and e.frame <= 10 then
+            spr(67, e.x, e.y, 2, 2)
+        elseif 10 < e.frame and e.frame <= 15 then
+            spr(69, e.x, e.y, 2, 2)
+        elseif 15 < e.frame and e.frame <= 20 then
+            spr(73, e.x, e.y, 2, 2)
+        elseif 20 < e.frame and e.frame <= 25 then            
+            spr(75, e.x, e.y, 2, 2)
+        elseif 25 < e.frame and e.frame <= 30 then
+            spr(77, e.x, e.y, 2, 2)
+        end
     end
 end
 
@@ -196,14 +228,16 @@ function draw_map()
 end
 
 function draw_player()
-    if 1 < player.frame and player.frame <= 4 then
-        spr(3, player.x, player.y, 2, 2)
-    elseif 4 < player.frame and player.frame <= 8 then
-        spr(5, player.x, player.y, 2, 2)
-    elseif 8 < player.frame and player.frame <= 20 then
-        spr(7, player.x, player.y, 2, 2)
-    else
-        spr(1, player.x, player.y, 2, 2)
+    if not PLAYER_HIT then
+        if 1 < player.frame and player.frame <= 4 then
+            spr(3, player.x, player.y, 2, 2)
+        elseif 4 < player.frame and player.frame <= 8 then
+            spr(5, player.x, player.y, 2, 2)
+        elseif 8 < player.frame and player.frame <= 20 then
+            spr(7, player.x, player.y, 2, 2)
+        else
+            spr(1, player.x, player.y, 2, 2)
+        end
     end
 end
 
@@ -257,6 +291,19 @@ function new_kamehameha(start_x, start_y, dx, dy)
     }
     add(objects, k)
 end  
+
+function new_explosion(start_x, start_y, dx, dy)
+    local e = {
+        x = start_x,
+        y = start_y,
+        dx = dx,
+        dy = dy,
+        frame = 0,
+        update = update_explosion,
+        draw = draw_explosion,
+    }
+    add(objects, e)
+end
 
 function initialize_star_interval()
     -- from: pico-8.fandom.com/wiki/Rnd
