@@ -11,22 +11,20 @@ __lua__
 -- shield flag: 3
 -- player flag: 4
 
-
-
 function _init()
     KAMEHAMEHA_STARTUP_FRAMES = 10
     LASER_PUSHBACK = 15
 
     MAP_X = 0
-    STAR_INTERVAL = 1
+    STAR_INTERVAL = -1
     STAR_SWITCH = true
     TWINKLE_X = 0
 
-    SHIELD_INTERVAL = 1
+    SHIELD_INTERVAL = -1
     SHIELD_SPRITE_INDICES = {15,31,47,63}
     SHIELD_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
-    METEOR_INTERVAL = 30
+    METEOR_INTERVAL = -1
 
     SHIELD_HIT = false
     PLAYER_HIT = false
