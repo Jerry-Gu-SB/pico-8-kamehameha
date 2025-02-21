@@ -132,7 +132,7 @@ function update_meteor(m)
 
     if m.x == 0 and not SHIELD_HIT then
         new_game_end_explosion(m.x, m.y, 0, 0)
-        
+
         --- make meteor disappear after explosion
         m.x = 1000
         m.y = 1000
@@ -148,7 +148,7 @@ function update_meteor(m)
     return m.frame < 150
 end
 
-function update_explosion(e)
+function update_game_end_explosion(e)
     e.frame += 1
     return e.frame < 35
 end
@@ -317,7 +317,7 @@ function new_game_end_explosion(start_x, start_y, dx, dy)
         dx = dx,
         dy = dy,
         frame = 0,
-        update = update_explosion,
+        update = update_game_end_explosion,
         draw = draw_game_end_explosion,
     }
     add(objects, e)
