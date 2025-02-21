@@ -11,23 +11,25 @@ __lua__
 -- shield flag: 3
 -- player flag: 4
 
-KAMEHAMEHA_STARTUP_FRAMES = 10
-LASER_PUSHBACK = 15
 
-MAP_X = 0
-STAR_INTERVAL = 1
-STAR_SWITCH = true
-TWINKLE_X = 0
-
-SHIELD_INTERVAL = 1
-SHIELD_SPRITE_INDICES = {15,31,47,63}
-SHIELD_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-
-METEOR_INTERVAL = 30
-
-GAME_OVER = false
 
 function _init()
+    KAMEHAMEHA_STARTUP_FRAMES = 10
+    LASER_PUSHBACK = 15
+
+    MAP_X = 0
+    STAR_INTERVAL = 1
+    STAR_SWITCH = true
+    TWINKLE_X = 0
+
+    SHIELD_INTERVAL = 1
+    SHIELD_SPRITE_INDICES = {15,31,47,63}
+    SHIELD_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+
+    METEOR_INTERVAL = 30
+
+    SHIELD_HIT = false
+    PLAYER_HIT = false
     objects = {}
     player = {
         x = 24,
@@ -48,13 +50,10 @@ function _update()
     update_button_4()
     spawn_meteor()
 
-    if is_object_colliding_with_shield(player, 16, 16) then
-        GAME_OVER = true
-    end
-
-    if GAME_OVER then
+    if SHIELD_HIT or PLAYER_HIT then
         if btnp(5) then
-            GAME_OVER = false
+            SHIELD_HIT = false
+            PLAYER_HIT = false
             _init()
         end
     end
@@ -125,6 +124,16 @@ end
 
 function update_meteor(m)
     m.frame += 1
+
+    if m.x == 0 then
+        GAME_OVER = true
+        SHIELD_HIT = true
+    end
+
+    if (player.x + 3 <= m.x) and (m.x <= player.x + 13) and (player.y <= m.y) and (m.y <= player.y + 11) then
+        PLAYER_HIT = true
+    end
+
     return m.frame < 150
 end
 
@@ -136,31 +145,17 @@ function update_button_4()
     end
 end
 
--- adapted from: https://www.lexaloffle.com/bbs/?tid=3116
-function is_object_colliding_with_shield(object, width, height)
-    collide = false
-    local x1 = object.x/8
-    local y1 = object.y/8
-    local x2 = (object.x + width)/8
-    local y2 = (object.y + height)/8
-    local a = fget(mget(x1, y1), 3)
-    local b = fget(mget(x2, y1), 3)
-    local c = fget(mget(x1, y2), 3)
-    local d = fget(mget(x2, y2), 3)
-    if a or b or c or d then collide = true end
-    return collide
-end
 
 function _draw()
     cls()
     draw_map()
     draw_player()
     draw_objects()
-    draw_fire()
+    draw_shield()
     
     print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
-    
-    if GAME_OVER then
+
+    if SHIELD_HIT or PLAYER_HIT then
         print("game over", 40, 64, 7)
         print("press 🅾️ to try again", 32, 72, 7)
     end
@@ -172,7 +167,7 @@ function draw_objects()
     end
 end
 
-function draw_fire()
+function draw_shield()
     if SHIELD_INTERVAL <= 1 then
         initialize_shield_interval()
         for i = 0, 15 do
@@ -273,7 +268,7 @@ function initialize_shield_interval()
 end
 
 function initialize_meteor_interval()
-    METEOR_INTERVAL = flr(rnd(30)) + 15
+    METEOR_INTERVAL = flr(rnd(30)) + 20
 end
 
 
