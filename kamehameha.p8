@@ -19,7 +19,6 @@ __lua__
     -- game over sfx
 
     -- game start screen?
-    -- extra animations for meteors flying by
     -- maybe redo stars to be less bright
 
 function _init()
@@ -55,6 +54,7 @@ function _init()
         draw = draw_player,
         health = 1,
     }
+
     music(0)
 end
 
@@ -109,6 +109,13 @@ function update_player()
     player.dx *= 0.7
     player.dy *= 0.7
 
+    if player.x < 5 then
+        PLAYER_HIT = true
+        SHIELD_HIT = true
+        for i = 0, 15 do
+            new_game_end_explosion(3, i * 8, 0, 0)
+        end
+    end
     --- Prevents player from moving after death
     if PLAYER_HIT then
         player.x = 1000
@@ -144,7 +151,9 @@ function update_meteor(m)
 
     if m.x == 0 and not SHIELD_HIT then
         new_game_end_explosion(m.x, m.y, 0, 0)
-
+        for i = 0, 15 do
+            new_game_end_explosion(3, i * 8, 0, 0)
+        end
         --- make meteor "disappear" after explosion
         m.x = 1000
         m.y = 1000
@@ -247,7 +256,7 @@ function draw_shield()
 end
 
 function draw_ui()
-    print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 2, 2, 7)
+    print("press 🅾️ to kamehamehaaaaaaaaaaaaaa", 10, 2, 7)
 
     if SHIELD_HIT or PLAYER_HIT then
         print("game over", 40, 64, 7)
