@@ -35,7 +35,7 @@ function _init()
     SHIELD_SPRITE_INDICES = {15,31,47,63}
     SHIELD_SPRITE_ARRAY = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
-    METEOR_INTERVAL = -1
+    METEOR_SPAWN_INTERVAL = -1
 
     SHIELD_HIT = false
     PLAYER_HIT = false
@@ -174,11 +174,11 @@ function update_button_4()
 end
 
 function spawn_meteor()
-    if METEOR_INTERVAL <= 1 then
-        initialize_meteor_interval()
+    if METEOR_SPAWN_INTERVAL <= 1 then
+        initialize_meteor_spawn_interval()
         new_meteor(128, flr(rnd(120)), -5, 0)
     end
-    METEOR_INTERVAL -= 1
+    METEOR_SPAWN_INTERVAL -= 1
 end
 
 function _draw()
@@ -276,8 +276,14 @@ function draw_kamehameha(k)
 end
 
 function draw_meteor(m)
-    if m.frame > 0 then
+    if m.frame % 5 == 0 then
+        m.draw_flag = not m.draw_flag
+    end
+
+    if m.frame > 0 and m.draw_flag then
         spr(35, m.x, m.y, 2, 1)
+    elseif m.frame > 0 and not m.draw_flag then
+        spr(37, m.x, m.y, 2, 1)
     end
 end
 
@@ -347,8 +353,8 @@ function initialize_shield_interval()
     SHIELD_INTERVAL = flr(rnd(21)) + 10
 end
 
-function initialize_meteor_interval()
-    METEOR_INTERVAL = flr(rnd(30)) + 20
+function initialize_meteor_spawn_interval()
+    METEOR_SPAWN_INTERVAL = flr(rnd(30)) + 20
 end
 
 
