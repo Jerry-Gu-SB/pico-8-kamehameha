@@ -13,8 +13,6 @@ __lua__
 
 --to do: 
     -- laser logic
-    -- shield hit sfx
-    -- player hit sfx
     -- meteor getting lasered sfx
     -- game over sfx
 
@@ -44,6 +42,7 @@ function _init()
     EXPLOSION_FRAME = 0
 
     objects = {}
+    meteors = {}
     player = {
         x = 24,
         y = 24,
@@ -133,6 +132,15 @@ function update_objects()
             objects[i].y += objects[i].dy
         end
     end
+
+    for i = #meteors, 1, -1 do
+        if not meteors[i]:update() then
+            del(meteors, meteors[i])
+        else
+            meteors[i].x += meteors[i].dx
+            meteors[i].y += meteors[i].dy
+        end
+    end
 end
 
 function update_kamehameha(k)
@@ -143,7 +151,25 @@ function update_kamehameha(k)
 
         player.dx -= LASER_PUSHBACK
     end
+
+    if 1 < player.frame and player.frame <= 4 then
+        k.hit_box_x = 8
+    elseif 4 < player.frame and player.frame <= 8 then
+        k.hit_box_x = 16
+    elseif 8 < player.frame and player.frame <= 20 then
+        k.hit_box_x = 24
+    else
+        k.hit_box_x = 28
+    end
+    
+    for m in all(meteors) do
+        if (k.x <= m.x) and (m.x <= k.x + k.hit_box_x) and (k.y - k.hit_box_y <= m.y) and (m.y <= k.y + k.hit_box_y * 1.8) then
+            m.explode = true
+        end
+    end
+
     return k.frame < 50
+
 end
 
 function update_meteor(m)
@@ -166,17 +192,30 @@ function update_meteor(m)
         PLAYER_HIT = true
     end
 
+    if m.explode then
+        new_meteor_explode(m.x, m.y, 0, 0)
+        m.x = 1000
+        m.y = 1000
+        m.explode = false
+    end
+
     return m.frame < 150
 end
 
 function update_game_end_explosion(e)
     e.frame += 1
-    
     if e.frame == 2 then
         sfx(5)
     end
-
     return e.frame < 35
+end
+
+function update_meteor_explode(m_e)
+    m_e.frame += 1
+    if m_e.frame == 2 then
+        sfx(6)
+    end
+    return m_e.frame < 15
 end
 
 function update_button_4()
@@ -237,6 +276,9 @@ end
 function draw_objects()
     for obj in all(objects) do
         obj:draw()
+    end
+    for m in all(meteors) do
+        m:draw()
     end
 end
 
@@ -317,6 +359,16 @@ function draw_game_end_explosion(e)
     end
 end
 
+function draw_meteor_explode(m_e)
+    if m_e.frame > 0 and m_e.frame <= 5 then
+        spr(39, m_e.x, m_e.y, 2, 2)
+    elseif m_e.frame > 5 and m_e.frame <= 10 then
+        spr(41, m_e.x, m_e.y, 2, 2)
+    elseif m_e.frame > 10 and m_e.frame <= 15 then
+        spr(43, m_e.x, m_e.y, 2, 2)
+    end
+end
+
 --- OBJECT INSTANTIATION
 function new_meteor(start_x, start_y, dx, dy)
     local m = {
@@ -327,8 +379,9 @@ function new_meteor(start_x, start_y, dx, dy)
         frame = 0,
         update = update_meteor,
         draw = draw_meteor,
+        explode = false,
     }
-    add(objects, m)
+    add(meteors, m)
 end
 
 function new_kamehameha(start_x, start_y, dx, dy)
@@ -340,6 +393,8 @@ function new_kamehameha(start_x, start_y, dx, dy)
         frame = 0,
         update = update_kamehameha,
         draw = draw_kamehameha,
+        hit_box_x = 0, -- starts out from the origin, and just grows right
+        hit_box_y = 8,
     }
     add(objects, k)
 end  
@@ -357,6 +412,19 @@ function new_game_end_explosion(start_x, start_y, dx, dy)
     add(objects, e)
 end
 
+function new_meteor_explode(start_x, start_y, dx, dy)
+    local m_e = {
+        x = start_x,
+        y = start_y,
+        dx = dx,
+        dy = dy,
+        frame = 0,
+        update = update_meteor_explode,
+        draw = draw_meteor_explode,
+    }
+    add(objects, m_e)
+end
+
 --- RANDOM NUMBER GENERATION
 function initialize_star_interval()
     -- from: pico-8.fandom.com/wiki/Rnd
@@ -368,7 +436,7 @@ function initialize_shield_interval()
 end
 
 function initialize_meteor_spawn_interval()
-    METEOR_SPAWN_INTERVAL = flr(rnd(30)) + 20
+    METEOR_SPAWN_INTERVAL = flr(rnd(90)) + 60
 end
 
 
@@ -448,6 +516,7 @@ __sfx__
 002502120000000000000001505000000150500000015050000001505000000150500000015050000001505000000150500000000000000000000000000000000000000000000000000000000000000000000000
 8e05000000401014510245104451084510a4410d4410f4410f4413e4413a4313743134421314112e4112b4512945127451234511f4511b4511745113451054510845102451054510040100401004010040100401
 000400000050000570306702b6602766023660216601d6501b65018650166501463012630116300f6300c6200a620096200862007620066100661005610056100460004600046000360003600036000260003600
+000300002f6502965025650216501d6501a6501665013650106500d6500b650096500665003650026500000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 02 01020344
 00 44424344
